@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Will We Run Out? An AI Inventory Assistant for Small Retailers</title>
+<link rel="stylesheet" href="style.css">
+<script defer src="app.js"></script>
+</head>
+<body>
+<header><div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="m3 7 9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4m-9 4v10M7.5 5l9 4"/></svg></span><div>Stockroom<small>INVENTORY REORDER ASSISTANT</small></div></div><span class="badge">● &nbsp; RETAIL DEMO</span></header>
+<main>
+<section class="intro"><div><div class="eyebrow">DAILY INVENTORY BRIEF</div><h1>Will we run out?</h1><p>See what to reorder today, how much to buy, and which deliveries need attention first.</p></div><div class="actions"><a href="sample-inventory.csv" download>Download sample</a><button id="upload">Upload CSV</button><input type="file" id="file" accept=".csv,text/csv" hidden></div></section>
+<div class="source"><span id="source">● &nbsp; Sample inventory</span><span id="import-status" role="status"></span><button id="reset" type="button">Reset sample</button></div>
+<section class="stats" aria-label="Inventory summary">
+<div><span class="stat-icon mint">▤</span><span>Products monitored<strong id="count"></strong></span></div>
+<div><span class="stat-icon peach">!</span><span>Stockout risks<strong id="risks"></strong></span></div>
+<div><span class="stat-icon yellow">↗</span><span>Products to reorder<strong id="orders"></strong></span></div>
+</section>
+<div class="workspace">
+<section class="panel inventory"><div class="panelhead"><div class="eyebrow">01 / INVENTORY</div><h2>Reorder priorities</h2><p>Choose a product to review its forecast and order quantity.</p></div>
+<div class="tablewrap"><table><thead><tr><th>Product</th><th>On hand</th><th>Coverage</th><th>Buy today</th><th>Priority</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="tablefoot">Expedite first, then reorder. Quantities use each product’s selling unit.</div>
+</section>
+<section class="panel detail" aria-label="Selected product"><div class="panelhead"><div class="eyebrow">02 / PRODUCT REVIEW</div><h2 id="product"></h2><p id="inputs"></p></div>
+<div class="detailbody">
+<label class="lead" for="lead"><span>Supplier lead time<small>Days until replenishment</small></span><span class="stepper"><button id="less" aria-label="Reduce lead time">−</button><input id="lead" type="number" min="0" max="365" step="1" inputmode="numeric"><button id="more" aria-label="Increase lead time">+</button></span></label>
+<div id="forecast" class="forecast" aria-live="polite"></div><div id="timeline" class="timeline"></div>
+<details><summary>How this is calculated</summary><p id="formula"></p></details>
+</div></section>
+<section class="panel notes"><div class="panelhead"><div class="eyebrow">03 / SUPPLIER UPDATE</div><h2>Update from a supplier note</h2><p>Paste a delivery update. Review the suggested lead time before applying it.</p></div>
+<div class="detailbody"><label for="note" class="note-label">Manager’s note</label><textarea id="note" maxlength="2000" rows="2" placeholder="The supplier moved the delivery from Tuesday to Thursday."></textarea><div class="note-actions"><button id="example" class="secondary">Use example note</button><button id="interpret">Propose update →</button></div><div id="proposal" role="status"></div></div></section>
+</div>
+<footer><span>Stockroom · Small supermarket demo</span><span>Will We Run Out? An AI Inventory Assistant for Small Retailers</span></footer>
+</main>
+</body>
+</html>
