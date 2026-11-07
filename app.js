@@ -17,10 +17,13 @@ function product(values, id) {
 function forecast(item) {
   const { stock, sales, lead, target } = item;
   const coverage = sales > 0 ? stock / sales : Infinity;
-  const remaining = stock - sales * lead;
+  const demand = sales * lead;
+  const remaining = stock - demand;
   const shortage = Math.max(0, -remaining);
-  const buy = Math.max(0, Math.ceil(target - Math.max(0, remaining)));
-  return { coverage, remaining, shortage, buy, rank: shortage > 0 ? 0 : buy > 0 ? 1 : 2 };
+  const projectedStock = Math.max(0, remaining);
+  const targetGap = Math.max(0, target - projectedStock);
+  const buy = Math.ceil(targetGap);
+  return { coverage, demand, projectedStock, shortage, targetGap, buy, rank: shortage > 0 ? 0 : buy > 0 ? 1 : 2 };
 }
 
 function parseCSV(input) {
@@ -190,7 +193,13 @@ function start() {
   function render() {
     renderInventory();
     const item = current();
-    const { coverage, remaining, shortage, buy } = forecast(item);
+    const { coverage, demand, projectedStock, shortage, targetGap, buy } = forecast(item);
+    const quantity = value => number(value) + " " + item.unit;
+    $("expected-demand").textContent = quantity(demand);
+    $("arrival-stock").textContent = quantity(projectedStock);
+    $("target-gap").textContent = quantity(targetGap);
+    $("at-risk").textContent = quantity(shortage);
+    $("risk-explanation").hidden = shortage === 0;
     $("product").textContent = item.name;
     $("inputs").textContent = number(item.stock) + " " + item.unit + " on hand · " + number(item.sales) + " sold/day · Target " + number(item.target);
     $("lead").value = item.lead;
@@ -201,7 +210,7 @@ function start() {
     const description = document.createElement("p");
     description.textContent = shortage > 0
       ? "Stock lasts " + number(coverage) + " days, about " + number(item.lead - coverage) + " days short. Expedite the order or use an alternate supplier."
-      : (item.sales > 0 ? "Stock lasts about " + number(coverage) + " days. " : "Average daily sales are zero. ") + "About " + number(remaining) + " " + item.unit + " expected at delivery.";
+      : (item.sales > 0 ? "Stock lasts about " + number(coverage) + " days. " : "Average daily sales are zero. ") + "About " + number(projectedStock) + " " + item.unit + " expected at delivery.";
     $("forecast").classList.toggle("danger", shortage > 0);
     $("forecast").replaceChildren(headline, description);
     const horizon = Math.max(1, item.lead, Number.isFinite(coverage) ? coverage : 0);

@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Will We Run Out? An AI Inventory Assistant for Small Retailers</title>
-<link rel="stylesheet" href="style.css?v=2">
-<script defer src="app.js?v=2"></script>
+<link rel="stylesheet" href="style.css?v=3">
+<script defer src="app.js?v=3"></script>
 </head>
 <body>
 <header><div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="m3 7 9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4m-9 4v10M7.5 5l9 4"/></svg></span><div>Stockroom<small>INVENTORY REORDER ASSISTANT</small></div></div><div class="header-actions"><span class="badge">● &nbsp; RETAIL DEMO</span><label class="theme-control">Theme <select id="theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label></div></header>
@@ -26,6 +26,14 @@
 <div class="detailbody">
 <label class="lead" for="lead"><span>Supplier lead time<small>Days until replenishment</small></span><span class="stepper"><button id="less" aria-label="Reduce lead time">−</button><input id="lead" type="number" min="0" max="365" step="1" inputmode="numeric"><button id="more" aria-label="Increase lead time">+</button></span></label>
 <div id="forecast" class="forecast" aria-live="polite"></div><div id="timeline" class="timeline"></div>
+<h3 class="breakdown-title">Order breakdown</h3>
+<dl class="breakdown">
+  <div><dt>Expected demand before delivery</dt><dd id="expected-demand"></dd></div>
+  <div><dt>Stock left at delivery</dt><dd id="arrival-stock"></dd></div>
+  <div><dt>Gap to target stock</dt><dd id="target-gap"></dd></div>
+  <div><dt>Demand at risk before delivery</dt><dd id="at-risk"></dd></div>
+</dl>
+<p class="risk-explanation" id="risk-explanation" hidden>Demand at risk is the amount customers may want before delivery that current stock cannot cover. The suggested order brings stock back to target at delivery.</p>
 <details><summary>How this is calculated</summary><p id="formula"></p></details>
 </div></section>
 <section class="panel notes"><div class="panelhead"><div class="eyebrow">03 / SUPPLIER UPDATE</div><h2>Update from a supplier note</h2><p>Paste a delivery update. Review the suggested lead time before applying it.</p></div>
