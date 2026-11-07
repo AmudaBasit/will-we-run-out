@@ -107,6 +107,22 @@ async function interpret(note, item) {
 
 function start() {
   const $ = id => document.getElementById(id);
+  const theme = $("theme");
+  try {
+    const saved = localStorage.getItem("stockroom-theme");
+    if (["light", "dark", "system"].includes(saved)) theme.value = saved;
+  } catch {
+    // Theme selection still works when browser storage is unavailable.
+  }
+  function applyTheme() {
+    document.documentElement.dataset.theme = theme.value;
+  }
+  applyTheme();
+  theme.onchange = () => {
+    applyTheme();
+    try { localStorage.setItem("stockroom-theme", theme.value); } catch {}
+  };
+
   let items = sample.map(product);
   let selected = 0;
   let revision = 0;
@@ -120,7 +136,7 @@ function start() {
     $("proposal").replaceChildren();
   }
 
-  function render() {
+  function renderInventory() {
     const ordered = items.map(item => ({ item, result: forecast(item) })).sort((a, b) =>
       a.result.rank - b.result.rank ||
       (a.result.rank === 0 ? a.result.coverage - b.result.coverage : b.result.buy - a.result.buy) ||
@@ -129,7 +145,12 @@ function start() {
     $("count").textContent = items.length;
     $("risks").textContent = ordered.filter(({ result }) => result.shortage > 0).length;
     $("orders").textContent = ordered.filter(({ result }) => result.buy > 0).length;
-    const rows = ordered.map(({ item, result }) => {
+    const query = $("search").value.trim().toLowerCase();
+    const priority = $("priority").value;
+    const visible = ordered.filter(({ item, result }) =>
+      item.name.toLowerCase().includes(query) && (priority === "" || Number(priority) === result.rank)
+    );
+    const rows = visible.map(({ item, result }) => {
       const row = document.createElement("tr");
       row.classList.toggle("selected", item.id === selected);
       const pick = document.createElement("button");
@@ -154,7 +175,20 @@ function start() {
       row.insertCell().append(pill);
       return row;
     });
+    if (!rows.length) {
+      const row = document.createElement("tr");
+      const cell = row.insertCell();
+      cell.colSpan = 5;
+      cell.className = "empty-results";
+      cell.textContent = "No matching products. Try another search or priority.";
+      rows.push(row);
+    }
     $("rows").replaceChildren(...rows);
+    $("table-count").textContent = "Showing " + visible.length + " of " + items.length + " products.";
+  }
+
+  function render() {
+    renderInventory();
     const item = current();
     const { coverage, remaining, shortage, buy } = forecast(item);
     $("product").textContent = item.name;
@@ -202,6 +236,8 @@ function start() {
     render();
   }
 
+  $("search").oninput = renderInventory;
+  $("priority").onchange = renderInventory;
   $("lead").onchange = event => setLead(event.target.valueAsNumber);
   $("less").onclick = () => setLead(current().lead - 1);
   $("more").onclick = () => setLead(current().lead + 1);
@@ -240,6 +276,8 @@ function start() {
 
   function load(next, label) {
     items = next;
+    $("search").value = "";
+    $("priority").value = "";
     selected = items.find(item => item.name.toLowerCase() === "bottled water")?.id ?? items[0].id;
     $("source").textContent = "●  " + label;
     $("note").value = "";
